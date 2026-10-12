@@ -18,7 +18,6 @@ const formError = ref("");
 const form = ref({
     title: "",
     type: "",
-    state: "disponible",
 });
 
 watch(
@@ -26,9 +25,9 @@ watch(
     (val) => {
         formError.value = "";
         if (val) {
-            form.value = { ...val };
+            form.value = { title: val.title, type: val.type };
         } else {
-            form.value = { title: "", type: "", state: "disponible" };
+            form.value = { title: "", type: "" };
         }
     },
     { immediate: true }
@@ -69,15 +68,6 @@ async function handleSubmit() {
                 <label class="label"><span class="label-text font-medium">Tipo / Categoría</span></label>
                 <input v-model="form.type" type="text" placeholder="Ej. Libro, Electrónica, Útiles"
                     class="input input-bordered w-full focus:input-primary" required />
-            </div>
-
-            <div class="form-control">
-                <label class="label"><span class="label-text font-medium">Estado</span></label>
-                <select v-model="form.state" class="select select-bordered w-full focus:select-primary" required>
-                    <option value="disponible">Disponible</option>
-                    <!-- <option value="reservado">Reservado</option> -->
-                    <option value="intercambiado">Intercambiado</option>
-                </select>
             </div>
 
             <div class="modal-action mt-6">

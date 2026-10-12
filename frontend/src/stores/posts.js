@@ -112,7 +112,7 @@ export const usePostsStore = defineStore("posts", () => {
         if (!res.ok) {
             throw new Error(
                 data.message || data.error ||
-                    "Error al eliminar la publicación",
+                    "Error al reservar la publicación",
             );
         }
         const index = posts.value.findIndex((p) => p.id === id);

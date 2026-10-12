@@ -113,14 +113,18 @@ onMounted(() => {
                                 </svg>
                             </button>
 
-                            <button v-if="post.state === 'reservado'" @click="handleComplete(post.id)"
-                                class="btn btn-square btn-ghost btn-sm text-success" title="Completar intercambio"
-                                aria-label="Completar intercambio">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                </svg>
-                            </button>
+                            <div v-if="post.state !== 'intercambiado'" class="tooltip tooltip-left"
+                                :data-tip="post.state === 'disponible' ? 'Primero debes reservarlo' : 'Completar intercambio'">
+                                <button @click="handleComplete(post.id)"
+                                    :disabled="post.state === 'disponible'"
+                                    class="btn btn-square btn-ghost btn-sm text-success disabled:opacity-30"
+                                    aria-label="Completar intercambio">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                        stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                    </svg>
+                                </button>
+                            </div>
 
                             <div class="tooltip tooltip-left"
                                 :data-tip="post.state === 'reservado' ? 'Publicación reservada, no se puede editar' : post.state === 'intercambiado' ? 'Publicación intercambiada, no se puede editar' : 'Editar'">
