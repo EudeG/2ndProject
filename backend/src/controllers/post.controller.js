@@ -109,15 +109,13 @@ exports.toggleReservation = async (req, res) => {
         throw new HttpError(400, error);
     }
 
-    const state = post.state === "reservado" ? "disponible" : "reservado";
-    await post.update({ state });
+    if (post.state === "reservado") {
+        await post.update({ state: "disponible", reservedById: null });
+        return res.json({ message: "Reserva liberada", post });
+    }
 
-    res.json({
-        message: state === "reservado"
-            ? "Publicación reservada."
-            : "Reserva liberada",
-        post,
-    });
+    await post.update({ state: "reservado", reservedById: req.user.id });
+    res.json({ message: "Publicación reservada.", post });
 };
 
 exports.complete = async (req, res) => {
@@ -129,7 +127,8 @@ exports.complete = async (req, res) => {
 
     const error = getCompleteError(post, req.user.id);
     if (error) {
-        throw new HttpError(400, error);
+        const status = post.state === "reservado" ? 403 : 400;
+        throw new HttpError(status, error);
     }
 
     await post.update({ state: "intercambiado" });

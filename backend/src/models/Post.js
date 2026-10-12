@@ -26,6 +26,10 @@ Post.init(
             allowNull: false,
             defaultValue: DataTypes.NOW,
         },
+        reservedById: {
+            type: DataTypes.UUID,
+            allowNull: true,
+        },
     },
     { 
         sequelize, 

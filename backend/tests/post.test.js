@@ -106,11 +106,17 @@ describe("Restricciones de estado en publicaciones", () => {
     test("5. debería alternar entre reservado y disponible", async () => {
         Post.findByPk.mockResolvedValue(mockPost);
         await postController.toggleReservation(mockReq, mockRes);
-        expect(mockPost.update).toHaveBeenCalledWith({ state: "reservado" });
+        expect(mockPost.update).toHaveBeenCalledWith({
+            state: "reservado",
+            reservedById: 1,
+        });
 
         mockPost.state = "reservado";
         await postController.toggleReservation(mockReq, mockRes);
-        expect(mockPost.update).toHaveBeenCalledWith({ state: "disponible" });
+        expect(mockPost.update).toHaveBeenCalledWith({
+            state: "disponible",
+            reservedById: null,
+        });
     });
 
     test("6. deberia completar el intercambio si el estado es reservado", async () => {

@@ -87,7 +87,7 @@ Content-Type: application/json
 # @name createPost
 POST {{baseUrl}}/posts
 Content-Type: application/json
-Authorization: Bearer {{rToken}}
+Authorization: Bearer {{authToken}}
 
 {
   "title": "Libro de Cálculo I",
@@ -132,7 +132,9 @@ Authorization: Bearer {{authToken}}
 
 ###
 
-### 15. Crear publicación en estado "reservado" para probar restricciones
+### ===== Flujo de completar intercambio (ejecutar en orden) =====
+
+### 15. Crear publicación (siempre empieza "disponible")
 # @name createReservedPost
 POST {{baseUrl}}/posts
 Content-Type: application/json
@@ -140,31 +142,71 @@ Authorization: Bearer {{authToken}}
 
 {
   "title": "Calculadora Científica",
-  "type": "Electronico",
-  "state": "reservado"
+  "type": "Electronico"
 }
 
 ###
 
-### 16.intentar editar la publicación reserva
+### 16. Completar una publicación disponible (Debe responder 400)
+PATCH {{baseUrl}}/posts/{{createReservedPost.response.body.post.id}}/complete
+Authorization: Bearer {{authToken}}
+
+###
+
+### 17. Reservar la publicación (guarda reservedById)
+PATCH {{baseUrl}}/posts/{{createReservedPost.response.body.post.id}}/reservation
+Authorization: Bearer {{authToken}}
+
+###
+
+### 18. Intentar editar la publicación reservada (Debe responder 403)
 PUT {{baseUrl}}/posts/{{createReservedPost.response.body.post.id}}
 Content-Type: application/json
 Authorization: Bearer {{authToken}}
 
 {
   "title": "Calculadora Científica (Editada)",
-  "type": "Electronico",
-  "state": "disponible"
+  "type": "Electronico"
 }
 
 ###
 
-### 17. intentar eliminar la publicación reservada
+### 19. Intentar eliminar la publicación reservada (Debe responder 403)
 DELETE {{baseUrl}}/posts/{{createReservedPost.response.body.post.id}}
 Authorization: Bearer {{authToken}}
 
 ###
 
-### 18. Completar el intercambio de la publicación reservada
+### 20. Iniciar sesión con otro usuario (usuario del seed)
+# @name loginOtro
+POST {{baseUrl}}/login
+Content-Type: application/json
+
+{
+  "email": "martita@truequeu.com",
+  "password": "Password123!"
+}
+
+###
+
+### 21. Otro usuario intenta completar (Debe responder 403)
 PATCH {{baseUrl}}/posts/{{createReservedPost.response.body.post.id}}/complete
+Authorization: Bearer {{loginOtro.response.body.token}}
+
+###
+
+### 22. El dueño completa el intercambio (Debe responder 200)
+PATCH {{baseUrl}}/posts/{{createReservedPost.response.body.post.id}}/complete
+Authorization: Bearer {{authToken}}
+
+###
+
+### 23. Completar otra vez (Debe responder 400)
+PATCH {{baseUrl}}/posts/{{createReservedPost.response.body.post.id}}/complete
+Authorization: Bearer {{authToken}}
+
+###
+
+### 24. Reiniciar el servidor y listar: el estado sigue "intercambiado"
+GET {{baseUrl}}/posts
 Authorization: Bearer {{authToken}}
