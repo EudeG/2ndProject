@@ -49,7 +49,10 @@ describe("Restricciones de estado en publicaciones", () => {
 
         await postController.update(mockReq, mockRes);
 
-        expect(mockPost.update).toHaveBeenCalledWith(mockReq.body);
+        expect(mockPost.update).toHaveBeenCalledWith({
+            title: "Libro de ED II (Editado)",
+            type: "Recurso Pal examen(E)",
+        });
         expect(mockRes.json).toHaveBeenCalled();
     });
 

@@ -1,5 +1,10 @@
 const { Post, User } = require("../models");
 const { HttpError } = require("../middleware/errorHandler");
+const {
+    getCompleteError,
+    getReserveError,
+    getEditError,
+} = require("../rules/postRules");
 
 exports.list = async (req, res) => {
     const posts = await Post.findAll({
@@ -10,9 +15,9 @@ exports.list = async (req, res) => {
 };
 
 exports.create = async (req, res) => {
-    const { title, type, state } = req.body;
-    if (!title || !type || !state) {
-        throw new HttpError(400, "Título, tipo y estado son obligatorios.");
+    const { title, type } = req.body;
+    if (!title || !type) {
+        throw new HttpError(400, "Título y tipo son obligatorios.");
     }
 
     const owner = await User.findByPk(req.user.id);
@@ -23,7 +28,12 @@ exports.create = async (req, res) => {
         );
     }
 
-    const post = await Post.create({ title, type, state, userId: req.user.id });
+    const post = await Post.create({
+        title,
+        type,
+        state: "disponible",
+        userId: req.user.id,
+    });
     res.status(201).json({
         message: "Publicación registrada satisfactoriamente.",
         post,
@@ -41,24 +51,18 @@ exports.update = async (req, res) => {
         throw new HttpError(403, "No puedes editar una publicación ajena.");
     }
 
-    if (post.state === "reservado") {
-        throw new HttpError(403, "No puedes editar una publicación reservada");
+    const error = getEditError(post, "editar");
+    if (error) {
+        throw new HttpError(403, error);
     }
 
-    if (post.state === "intercambiado") {
-        throw new HttpError(
-            403,
-            "No puedes editar una publicación intercambiada.",
-        );
+    const { title, type } = req.body;
+
+    if (!title || !type) {
+        throw new HttpError(400, "Título y tipo son obligatorios.");
     }
 
-    const { title, type, state } = req.body;
-
-    if (!title || !type || !state) {
-        throw new HttpError(400, "Título, tipo y estado son obligatorios.");
-    }
-
-    await post.update({ title, type, state });
+    await post.update({ title, type });
 
     res.json({
         message: "Publicación actualizada satisfactoriamente",
@@ -77,18 +81,9 @@ exports.delete = async (req, res) => {
         throw new HttpError(403, "No puedes eliminar una publicación ajena");
     }
 
-    if (post.state === "reservado") {
-        throw new HttpError(
-            403,
-            "No puedes eliminar una publicación reservada.",
-        );
-    }
-
-    if (post.state === "intercambiado") {
-        throw new HttpError(
-            403,
-            "No puedes eliminar una publicación intercambiada.",
-        );
+    const error = getEditError(post, "eliminar");
+    if (error) {
+        throw new HttpError(403, error);
     }
 
     await post.destroy();
@@ -109,11 +104,9 @@ exports.toggleReservation = async (req, res) => {
         throw new HttpError(403, "No puedes editar una publicación ajena.");
     }
 
-    if (post.state === "intercambiado") {
-        throw new HttpError(
-            400,
-            "No puedes reservar una publicación intercambiada",
-        );
+    const error = getReserveError(post);
+    if (error) {
+        throw new HttpError(400, error);
     }
 
     const state = post.state === "reservado" ? "disponible" : "reservado";
@@ -134,15 +127,9 @@ exports.complete = async (req, res) => {
         throw new HttpError(404, "Publicación no encontrada.");
     }
 
-    if (post.userId !== req.user.id) {
-        throw new HttpError(403, "No puedes editar una publicación ajena.");
-    }
-
-    if (post.state !== "reservado") {
-        throw new HttpError(
-            400,
-            "Solo puedes completar una publicación reservada.",
-        );
+    const error = getCompleteError(post, req.user.id);
+    if (error) {
+        throw new HttpError(400, error);
     }
 
     await post.update({ state: "intercambiado" });
