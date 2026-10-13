@@ -8,6 +8,9 @@ export const usePostsStore = defineStore("posts", () => {
     const posts = ref([]);
     const loading = ref(false);
     const error = ref(null);
+    const explorePosts = ref([]);
+    const exploreLoading = ref(false);
+    const exploreError = ref(null);
 
     const auth = useAuthStore();
 
@@ -38,6 +41,32 @@ export const usePostsStore = defineStore("posts", () => {
             throw err;
         } finally {
             loading.value = false;
+        }
+    }
+
+    async function fetchExplore(filters = {}) {
+        exploreLoading.value = true;
+        exploreError.value = null;
+        try {
+            const params = new URLSearchParams();
+            for (const [key, value] of Object.entries(filters)) {
+                if (value) params.set(key, value);
+            }
+            const res = await fetch(`${API_URL}/posts/explore?${params}`, {
+                headers: getHeaders(),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(
+                    data.message || data.error ||
+                        "Error al cargar publicaciones",
+                );
+            }
+            explorePosts.value = data.posts || [];
+        } catch (err) {
+            exploreError.value = err.message;
+        } finally {
+            exploreLoading.value = false;
         }
     }
 
@@ -149,7 +178,11 @@ export const usePostsStore = defineStore("posts", () => {
         posts,
         loading,
         error,
+        explorePosts,
+        exploreLoading,
+        exploreError,
         fetchPosts,
+        fetchExplore,
         createPost,
         updatePost,
         deletePost,

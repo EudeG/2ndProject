@@ -49,13 +49,14 @@ async function run() {
         console.log("Insertando publicaciones semilla...");
         for (const data of posts) {
             const owner = createdUsers[data.owner];
+            const reserver = createdUsers[(data.owner + 1) % createdUsers.length];
             const post = await Post.create({
                 title: data.title,
                 category: data.category,
                 condition: data.condition,
                 state: data.state,
                 userId: owner.id,
-                reservedById: data.state === "reservado" ? owner.id : null,
+                reservedById: data.state === "reservado" ? reserver.id : null,
             });
             console.log(`+ Publicación: "${post.title}" (${post.state}) de ${owner.name}`);
         }

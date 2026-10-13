@@ -27,7 +27,7 @@ async function logout() {
                 <ul class="menu menu-horizontal gap-1 px-1">
                     <li>
                         <RouterLink :to="{ name: 'dashboard' }" exact-active-class="active font-medium">
-                            Dashboard
+                            Explorar
                         </RouterLink>
                     </li>
                     <li>

@@ -107,7 +107,7 @@ onMounted(() => {
                         class="flex flex-col items-center gap-1">
                         <div class="inline-flex items-center gap-1">
 
-                            <button v-if="post.state !== 'intercambiado'" @click="handleToggleReservation(post.id)"
+                            <button v-if="post.state === 'reservado'" @click="handleToggleReservation(post.id)"
                                 class="btn btn-square btn-ghost btn-sm"
                                 :class="post.state === 'reservado' ? 'text-warning' : 'text-success'"
                                 :title="post.state === 'reservado' ? 'Liberar reserva' : 'Reservar'">
@@ -126,7 +126,7 @@ onMounted(() => {
                             </button>
 
                             <div v-if="post.state !== 'intercambiado'" class="tooltip tooltip-left"
-                                :data-tip="post.state === 'disponible' ? 'Primero debes reservarlo' : 'Completar intercambio'">
+                                :data-tip="post.state === 'disponible' ? 'Primero otro estudiante debe reservarlo' : 'Completar intercambio'">
                                 <button @click="handleComplete(post.id)"
                                     :disabled="post.state === 'disponible'"
                                     class="btn btn-square btn-ghost btn-sm text-success disabled:opacity-30"
@@ -169,7 +169,7 @@ onMounted(() => {
                         </div>
 
                         <span v-if="post.state === 'reservado'" class="text-xs text-warning font-medium">
-                            {{ 'Reservado, no se puede modificar' }}
+                            Reservado por {{ post.reservedBy?.name }}
                         </span>
                         <span v-if="post.state === 'intercambiado'" class="text-xs opacity-60 font-medium">
                             Intercambiado, no se puede modificar

@@ -14,6 +14,7 @@ const conditions = ["nuevo", "usado"];
 exports.list = async (req, res) => {
     const posts = await Post.findAll({
         where: { userId: req.user.id },
+        include: [{ model: User, as: "reservedBy", attributes: ["id", "name"] }],
         order: [["publishedAt", "DESC"]],
     });
     res.json({ posts });
@@ -26,7 +27,10 @@ exports.explore = async (req, res) => {
 
     const posts = await Post.findAll({
         where,
-        include: [{ model: User, as: "owner", attributes: ["id", "name"] }],
+        include: [
+            { model: User, as: "owner", attributes: ["id", "name"] },
+            { model: User, as: "reservedBy", attributes: ["id", "name"] },
+        ],
         order: [["publishedAt", "DESC"]],
     });
     res.json({ posts });
@@ -137,13 +141,10 @@ exports.toggleReservation = async (req, res) => {
         throw new HttpError(404, "Publicación no encontrada.");
     }
 
-    if (post.userId !== req.user.id) {
-        throw new HttpError(403, "No puedes editar una publicación ajena.");
-    }
-
-    const error = getReserveError(post);
+    const error = getReserveError(post, req.user.id);
     if (error) {
-        throw new HttpError(400, error);
+        const status = post.state === "intercambiado" ? 400 : 403;
+        throw new HttpError(status, error);
     }
 
     if (post.state === "reservado") {

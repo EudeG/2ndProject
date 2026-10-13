@@ -1,9 +1,240 @@
 <script setup>
+import { ref, computed, watch } from "vue";
+import { useRoute, useRouter } from "vue-router";
+import { storeToRefs } from "pinia";
+import { usePostsStore } from "@/stores/posts";
 import { useAuthStore } from "@/stores/auth";
 
-const auth = useAuthStore();
+import PageTitle from "@/components/PageTitle.vue";
+import StateBadge from "@/components/StateBadge.vue";
+
+const route = useRoute();
+const router = useRouter();
+const postsStore = usePostsStore();
+const authStore = useAuthStore();
+const { explorePosts, exploreLoading, exploreError } = storeToRefs(postsStore);
+
+const categoryLabels = {
+    libros: "Libros",
+    electronica: "Electrónica",
+    ropa: "Ropa",
+    otros: "Otros",
+};
+const conditionLabels = { nuevo: "Nuevo", usado: "Usado" };
+const stateLabels = {
+    disponible: "Disponible",
+    reservado: "Reservado",
+    intercambiado: "Intercambiado",
+};
+
+const q = ref("");
+const category = ref("");
+const condition = ref("");
+const state = ref("");
+
+const filters = computed(() => ({
+    q: route.query.q || "",
+    category: route.query.category || "",
+    condition: route.query.condition || "",
+    state: route.query.state || "",
+}));
+
+const chips = computed(() => {
+    const list = [];
+    if (filters.value.q) {
+        list.push({ key: "q", text: `Búsqueda: ${filters.value.q}` });
+    }
+    if (filters.value.category) {
+        list.push({
+            key: "category",
+            text: `Categoría: ${categoryLabels[filters.value.category] || filters.value.category}`,
+        });
+    }
+    if (filters.value.condition) {
+        list.push({
+            key: "condition",
+            text: `Condición: ${conditionLabels[filters.value.condition] || filters.value.condition}`,
+        });
+    }
+    if (filters.value.state) {
+        list.push({
+            key: "state",
+            text: `Disponibilidad: ${stateLabels[filters.value.state] || filters.value.state}`,
+        });
+    }
+    return list;
+});
+
+const countText = computed(() => {
+    const n = explorePosts.value.length;
+    if (chips.value.length > 0) {
+        return n === 1 ? "1 resultado" : `${n} resultados`;
+    }
+    return n === 1 ? "1 publicación" : `${n} publicaciones`;
+});
+
+function applyFilters(values) {
+    const query = {};
+    for (const [key, value] of Object.entries(values)) {
+        if (value) query[key] = value;
+    }
+    router.push({ name: "dashboard", query });
+}
+
+function search() {
+    applyFilters({
+        q: q.value.trim(),
+        category: category.value,
+        condition: condition.value,
+        state: state.value,
+    });
+}
+
+function removeFilter(key) {
+    applyFilters({ ...filters.value, [key]: "" });
+}
+
+function clearFilters() {
+    applyFilters({});
+}
+
+function loadPosts() {
+    postsStore.fetchExplore(filters.value);
+}
+
+async function handleToggleReservation(id) {
+    try {
+        await postsStore.toggleReservation(id);
+        loadPosts();
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+async function handleComplete(id) {
+    if (!confirm("¿Deseas marcar este intercambio como completado?")) return;
+    try {
+        await postsStore.completeExchange(id);
+        loadPosts();
+    } catch (err) {
+        alert(err.message);
+    }
+}
+
+watch(
+    () => route.query,
+    () => {
+        q.value = filters.value.q;
+        category.value = filters.value.category;
+        condition.value = filters.value.condition;
+        state.value = filters.value.state;
+        loadPosts();
+    },
+    { immediate: true },
+);
 </script>
 
 <template>
-    <h1 class="text-black text-3xl">Hola, {{ auth.user?.name }}</h1>
+    <div class="mx-auto max-w-6xl p-6">
+        <PageTitle title="Explorar" subtitle="Encuentra objetos para intercambiar con otros estudiantes" />
+
+        <form @submit.prevent="search"
+            class="card bg-base-100 shadow-sm border border-base-300 mt-6 p-4 flex flex-col lg:flex-row gap-3">
+            <input v-model="q" type="text" placeholder="Buscar por título" class="input input-bordered w-full lg:flex-1" />
+            <select v-model="category" @change="search" class="select select-bordered w-full lg:w-52">
+                <option value="">Todas las categorías</option>
+                <option value="libros">Libros</option>
+                <option value="electronica">Electrónica</option>
+                <option value="ropa">Ropa</option>
+                <option value="otros">Otros</option>
+            </select>
+            <select v-model="condition" @change="search" class="select select-bordered w-full lg:w-52">
+                <option value="">Cualquier condición</option>
+                <option value="nuevo">Nuevo</option>
+                <option value="usado">Usado</option>
+            </select>
+            <select v-model="state" @change="search" class="select select-bordered w-full lg:w-52">
+                <option value="">Disponibles y reservados</option>
+                <option value="disponible">Disponible</option>
+                <option value="reservado">Reservado</option>
+                <option value="intercambiado">Intercambiado</option>
+            </select>
+            <button type="submit" class="btn btn-primary">Buscar</button>
+        </form>
+
+        <div v-if="chips.length > 0" class="flex flex-wrap items-center justify-between gap-3 mt-4">
+            <div class="flex flex-wrap gap-2">
+                <span v-for="chip in chips" :key="chip.key" class="badge badge-primary badge-soft badge-lg gap-2">
+                    {{ chip.text }}
+                    <button type="button" @click="removeFilter(chip.key)" aria-label="Quitar filtro">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                            stroke="currentColor" class="h-4 w-4">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </span>
+            </div>
+            <button type="button" @click="clearFilters" class="btn btn-outline btn-sm">Limpiar filtros</button>
+        </div>
+
+        <div v-if="exploreLoading" class="flex justify-center py-16">
+            <span class="loading loading-spinner loading-lg text-primary"></span>
+        </div>
+
+        <div v-else-if="exploreError" class="alert alert-error shadow-sm mt-6 flex justify-between">
+            <span>{{ exploreError }}</span>
+            <button type="button" @click="loadPosts" class="btn btn-sm">Reintentar</button>
+        </div>
+
+        <template v-else>
+            <p class="text-sm text-base-content/70 mt-6 mb-3">{{ countText }}</p>
+
+            <div v-if="explorePosts.length > 0" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div v-for="post in explorePosts" :key="post.id"
+                    class="card bg-base-100 shadow-sm border border-base-300 p-4 flex flex-col gap-2">
+                    <h2 class="font-bold text-lg">{{ post.title }}</h2>
+                    <p class="text-sm text-base-content/60">de {{ post.owner?.name }}</p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="badge badge-outline badge-sm">
+                            {{ categoryLabels[post.category] || post.category }}
+                        </span>
+                        <span class="badge badge-outline badge-sm">
+                            {{ conditionLabels[post.condition] || post.condition }}
+                        </span>
+                    </div>
+                    <div>
+                        <StateBadge :state="post.state" />
+                    </div>
+                    <div v-if="post.state === 'disponible'">
+                        <button type="button" @click="handleToggleReservation(post.id)"
+                            class="btn btn-primary btn-sm">Reservar</button>
+                    </div>
+                    <div v-else-if="post.state === 'reservado' && post.reservedById === authStore.user?.id"
+                        class="flex flex-wrap gap-2">
+                        <button type="button" @click="handleComplete(post.id)"
+                            class="btn btn-success btn-sm">Completar intercambio</button>
+                        <button type="button" @click="handleToggleReservation(post.id)"
+                            class="btn btn-ghost btn-sm">Liberar reserva</button>
+                    </div>
+                    <p v-else-if="post.state === 'reservado'" class="text-xs text-base-content/60">
+                        Reservado por otra persona
+                    </p>
+                </div>
+            </div>
+
+            <div v-else class="card bg-base-100 shadow-sm border border-base-300 py-12 px-4 items-center text-center">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
+                    stroke="currentColor" class="h-12 w-12 text-base-content/40">
+                    <path stroke-linecap="round" stroke-linejoin="round"
+                        d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                </svg>
+                <template v-if="chips.length > 0">
+                    <p class="font-semibold mt-3">No hay publicaciones que coincidan con los filtros</p>
+                    <p class="text-sm text-base-content/60 mt-1">Prueba con otra palabra o quita algunos filtros.</p>
+                    <button type="button" @click="clearFilters" class="btn btn-primary mt-4">Limpiar filtros</button>
+                </template>
+                <p v-else class="font-semibold mt-3">Todavía no hay publicaciones de otros estudiantes.</p>
+            </div>
+        </template>
+    </div>
 </template>

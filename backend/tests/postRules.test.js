@@ -50,7 +50,7 @@ describe("Reglas para completar un intercambio", () => {
     test("6. restriccion, una intercambiada no se puede reservar, editar ni eliminar", () => {
         post.state = "intercambiado";
 
-        expect(getReserveError(post)).toBe(
+        expect(getReserveError(post, 2)).toBe(
             "No puedes reservar una publicación intercambiada.",
         );
         expect(getEditError(post, "editar")).toBe(
@@ -64,7 +64,25 @@ describe("Reglas para completar un intercambio", () => {
     test("7. una publicación disponible sí se puede reservar y editar", () => {
         post.state = "disponible";
 
-        expect(getReserveError(post)).toBeNull();
+        expect(getReserveError(post, 2)).toBeNull();
         expect(getEditError(post, "editar")).toBeNull();
+    });
+
+    test("8. restriccion, el dueño no puede reservar su propia publicación", () => {
+        post.state = "disponible";
+
+        expect(getReserveError(post, 1)).toBe(
+            "No puedes reservar tu propia publicación.",
+        );
+    });
+
+    test("9. quien reservó puede liberar la reserva", () => {
+        expect(getReserveError(post, 2)).toBeNull();
+    });
+
+    test("10. restriccion, un tercero no puede liberar la reserva", () => {
+        expect(getReserveError(post, 99)).toBe(
+            "Solo el dueño o quien reservó pueden liberar la reserva.",
+        );
     });
 });

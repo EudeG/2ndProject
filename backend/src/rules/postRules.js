@@ -10,9 +10,21 @@ function getCompleteError(post, userId) {
     return null;
 }
 
-function getReserveError(post) {
+function getReserveError(post, userId) {
     if (post.state === "intercambiado") {
         return "No puedes reservar una publicación intercambiada.";
+    }
+
+    if (post.state === "disponible" && post.userId === userId) {
+        return "No puedes reservar tu propia publicación.";
+    }
+
+    if (
+        post.state === "reservado" &&
+        post.userId !== userId &&
+        post.reservedById !== userId
+    ) {
+        return "Solo el dueño o quien reservó pueden liberar la reserva.";
     }
 
     return null;
