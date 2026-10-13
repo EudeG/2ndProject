@@ -17,7 +17,17 @@ Post.init(
             type: DataTypes.TEXT, 
             allowNull: false 
         },
-        state: { 
+        category: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            validate: { isIn: [["libros", "electronica", "ropa", "otros"]] },
+        },
+        condition: {
+            type: DataTypes.TEXT,
+            allowNull: true,
+            validate: { isIn: [["nuevo", "usado"]] },
+        },
+        state: {
             type: DataTypes.TEXT, 
             allowNull: false 
         },

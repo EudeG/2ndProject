@@ -1,3 +1,4 @@
+const { Op } = require("sequelize");
 const { Post, User } = require("../models");
 const { HttpError } = require("../middleware/errorHandler");
 const {
@@ -5,10 +6,24 @@ const {
     getReserveError,
     getEditError,
 } = require("../rules/postRules");
+const { buildPostWhere } = require("../rules/postFilters");
 
 exports.list = async (req, res) => {
     const posts = await Post.findAll({
         where: { userId: req.user.id },
+        order: [["publishedAt", "DESC"]],
+    });
+    res.json({ posts });
+};
+
+exports.explore = async (req, res) => {
+    const { q, category, condition, state } = req.query;
+    const where = buildPostWhere({ q, category, condition, state });
+    where.userId = { [Op.ne]: req.user.id };
+
+    const posts = await Post.findAll({
+        where,
+        include: [{ model: User, as: "owner", attributes: ["id", "name"] }],
         order: [["publishedAt", "DESC"]],
     });
     res.json({ posts });

@@ -3,6 +3,7 @@ const c = require("../controllers/post.controller");
 const { verifyToken } = require("../middleware/auth");
 
 router.get("/posts", verifyToken, c.list);
+router.get("/posts/explore", verifyToken, c.explore);
 router.post("/posts", verifyToken, c.create);
 router.put("/posts/:id", verifyToken, c.update);
 router.delete("/posts/:id", verifyToken, c.delete);

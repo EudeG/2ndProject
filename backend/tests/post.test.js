@@ -1,11 +1,14 @@
 const postController = require("../src/controllers/post.controller");
-const { Post } = require("../src/models");
+const { Op } = require("sequelize");
+const { Post, User } = require("../src/models");
 const { HttpError } = require("../src/middleware/errorHandler");
 
 jest.mock("../src/models", () => ({
     Post: {
         findByPk: jest.fn(),
+        findAll: jest.fn(),
     },
+    User: {},
 }));
 
 describe("Restricciones de estado en publicaciones", () => {
@@ -141,4 +144,58 @@ describe("Restricciones de estado en publicaciones", () => {
         expect(mockPost.update).not.toHaveBeenCalled();
     });
 
+});
+
+describe("Explorar publicaciones", () => {
+    let mockReq;
+    let mockRes;
+
+    beforeEach(() => {
+        mockReq = {
+            user: { id: 1 },
+            query: {},
+        };
+
+        mockRes = {
+            json: jest.fn(),
+        };
+
+        Post.findAll.mockClear();
+    });
+
+    test("1. deberia devolver las publicaciones de otros usuarios", async () => {
+        const posts = [{ id: 20, title: "Calculadora", userId: 2 }];
+        Post.findAll.mockResolvedValue(posts);
+
+        await postController.explore(mockReq, mockRes);
+
+        expect(Post.findAll).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: {
+                    state: { [Op.ne]: "intercambiado" },
+                    userId: { [Op.ne]: 1 },
+                },
+            }),
+        );
+        expect(mockRes.json).toHaveBeenCalledWith({ posts });
+    });
+
+    test("2. deberia devolver una lista vacia si no hay coincidencias", async () => {
+        Post.findAll.mockResolvedValue([]);
+        mockReq.query = { q: "microscopio", category: "ropa" };
+
+        await postController.explore(mockReq, mockRes);
+
+        expect(Post.findAll).toHaveBeenCalledWith(
+            expect.objectContaining({
+                where: {
+                    title: { [Op.like]: "%microscopio%" },
+                    category: "ropa",
+                    state: { [Op.ne]: "intercambiado" },
+                    userId: { [Op.ne]: 1 },
+                },
+            }),
+        );
+        expect(mockRes.json).toHaveBeenCalledWith({ posts: [] });
+    });
 });
