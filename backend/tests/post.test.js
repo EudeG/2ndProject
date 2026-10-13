@@ -20,7 +20,8 @@ describe("Restricciones de estado en publicaciones", () => {
         mockPost = {
             id: 10,
             title: "Libro de Estructura de Datos",
-            type: "Material Universitario",
+            category: "libros",
+            condition: "usado",
             state: "disponible",
             userId: 1,
             update: jest.fn(),
@@ -46,7 +47,8 @@ describe("Restricciones de estado en publicaciones", () => {
 
         mockReq.body = {
             title: "Libro de ED II (Editado)",
-            type: "Recurso Pal examen(E)",
+            category: "libros",
+            condition: "nuevo",
             state: "disponible",
         };
 
@@ -54,7 +56,8 @@ describe("Restricciones de estado en publicaciones", () => {
 
         expect(mockPost.update).toHaveBeenCalledWith({
             title: "Libro de ED II (Editado)",
-            type: "Recurso Pal examen(E)",
+            category: "libros",
+            condition: "nuevo",
         });
         expect(mockRes.json).toHaveBeenCalled();
     });
@@ -78,7 +81,8 @@ describe("Restricciones de estado en publicaciones", () => {
 
         mockReq.body = {
             title: "Intentar editar ilegalemnte",
-            type: "Cambiar tipo ilegalemnte",
+            category: "ropa",
+            condition: "nuevo",
             state: "disponible",
         };
 
@@ -130,7 +134,7 @@ describe("Restricciones de estado en publicaciones", () => {
 
         expect(mockPost.update).toHaveBeenCalledWith({ state: "intercambiado" });
         expect(mockPost.title).toBe("Libro de Estructura de Datos");
-        expect(mockPost.type).toBe("Material Universitario");
+        expect(mockPost.category).toBe("libros");
         expect(mockRes.json).toHaveBeenCalled();
     });
 
@@ -139,6 +143,39 @@ describe("Restricciones de estado en publicaciones", () => {
 
         await expect(postController.complete(mockReq, mockRes)).rejects.toThrow(
             "Solo puedes completar una publicación reservada.",
+        );
+
+        expect(mockPost.update).not.toHaveBeenCalled();
+    });
+
+    test("8. validacion, deberia rechazar una categoria no valida al editar", async () => {
+        Post.findByPk.mockResolvedValue(mockPost);
+        mockReq.body = { title: "Libro", category: "juguetes", condition: "usado" };
+
+        await expect(postController.update(mockReq, mockRes)).rejects.toThrow(
+            "Categoría no válida.",
+        );
+
+        expect(mockPost.update).not.toHaveBeenCalled();
+    });
+
+    test("9. validacion, deberia rechazar editar si falta la condicion", async () => {
+        Post.findByPk.mockResolvedValue(mockPost);
+        mockReq.body = { title: "Libro", category: "libros" };
+
+        await expect(postController.update(mockReq, mockRes)).rejects.toThrow(
+            "Título, categoría y condición son obligatorios.",
+        );
+
+        expect(mockPost.update).not.toHaveBeenCalled();
+    });
+
+    test("10. validacion, deberia rechazar una condicion no valida al editar", async () => {
+        Post.findByPk.mockResolvedValue(mockPost);
+        mockReq.body = { title: "Libro", category: "libros", condition: "roto" };
+
+        await expect(postController.update(mockReq, mockRes)).rejects.toThrow(
+            "Condición no válida.",
         );
 
         expect(mockPost.update).not.toHaveBeenCalled();

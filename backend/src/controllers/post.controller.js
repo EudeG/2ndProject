@@ -8,6 +8,9 @@ const {
 } = require("../rules/postRules");
 const { buildPostWhere } = require("../rules/postFilters");
 
+const categories = ["libros", "electronica", "ropa", "otros"];
+const conditions = ["nuevo", "usado"];
+
 exports.list = async (req, res) => {
     const posts = await Post.findAll({
         where: { userId: req.user.id },
@@ -30,9 +33,18 @@ exports.explore = async (req, res) => {
 };
 
 exports.create = async (req, res) => {
-    const { title, type } = req.body;
-    if (!title || !type) {
-        throw new HttpError(400, "Título y tipo son obligatorios.");
+    const { title, category, condition } = req.body;
+    if (!title || !category || !condition) {
+        throw new HttpError(
+            400,
+            "Título, categoría y condición son obligatorios.",
+        );
+    }
+    if (!categories.includes(category)) {
+        throw new HttpError(400, "Categoría no válida.");
+    }
+    if (!conditions.includes(condition)) {
+        throw new HttpError(400, "Condición no válida.");
     }
 
     const owner = await User.findByPk(req.user.id);
@@ -45,7 +57,8 @@ exports.create = async (req, res) => {
 
     const post = await Post.create({
         title,
-        type,
+        category,
+        condition,
         state: "disponible",
         userId: req.user.id,
     });
@@ -71,13 +84,22 @@ exports.update = async (req, res) => {
         throw new HttpError(403, error);
     }
 
-    const { title, type } = req.body;
+    const { title, category, condition } = req.body;
 
-    if (!title || !type) {
-        throw new HttpError(400, "Título y tipo son obligatorios.");
+    if (!title || !category || !condition) {
+        throw new HttpError(
+            400,
+            "Título, categoría y condición son obligatorios.",
+        );
+    }
+    if (!categories.includes(category)) {
+        throw new HttpError(400, "Categoría no válida.");
+    }
+    if (!conditions.includes(condition)) {
+        throw new HttpError(400, "Condición no válida.");
     }
 
-    await post.update({ title, type });
+    await post.update({ title, category, condition });
 
     res.json({
         message: "Publicación actualizada satisfactoriamente",

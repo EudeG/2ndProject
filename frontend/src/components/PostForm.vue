@@ -17,7 +17,8 @@ const formError = ref("");
 
 const form = ref({
     title: "",
-    type: "",
+    category: "",
+    condition: "",
 });
 
 watch(
@@ -25,9 +26,13 @@ watch(
     (val) => {
         formError.value = "";
         if (val) {
-            form.value = { title: val.title, type: val.type };
+            form.value = {
+                title: val.title,
+                category: val.category,
+                condition: val.condition,
+            };
         } else {
-            form.value = { title: "", type: "" };
+            form.value = { title: "", category: "", condition: "" };
         }
     },
     { immediate: true }
@@ -65,9 +70,23 @@ async function handleSubmit() {
             </div>
 
             <div class="form-control">
-                <label class="label"><span class="label-text font-medium">Tipo / Categoría</span></label>
-                <input v-model="form.type" type="text" placeholder="Ej. Libro, Electrónica, Útiles"
-                    class="input input-bordered w-full focus:input-primary" required />
+                <label class="label"><span class="label-text font-medium">Categoría</span></label>
+                <select v-model="form.category" class="select select-bordered w-full focus:select-primary" required>
+                    <option value="" disabled>Elige una categoría</option>
+                    <option value="libros">Libros</option>
+                    <option value="electronica">Electrónica</option>
+                    <option value="ropa">Ropa</option>
+                    <option value="otros">Otros</option>
+                </select>
+            </div>
+
+            <div class="form-control">
+                <label class="label"><span class="label-text font-medium">Condición</span></label>
+                <select v-model="form.condition" class="select select-bordered w-full focus:select-primary" required>
+                    <option value="" disabled>Elige la condición</option>
+                    <option value="nuevo">Nuevo</option>
+                    <option value="usado">Usado</option>
+                </select>
             </div>
 
             <div class="modal-action mt-6">

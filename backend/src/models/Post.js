@@ -13,10 +13,6 @@ Post.init(
         title: { 
             type: DataTypes.STRING, 
             allowNull: false },
-        type: { 
-            type: DataTypes.TEXT, 
-            allowNull: false 
-        },
         category: {
             type: DataTypes.TEXT,
             allowNull: true,

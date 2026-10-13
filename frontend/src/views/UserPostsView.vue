@@ -14,6 +14,14 @@ const authStore = useAuthStore();
 const postsStore = usePostsStore();
 const { posts, loading, error } = storeToRefs(postsStore);
 
+const categoryLabels = {
+    libros: "Libros",
+    electronica: "Electrónica",
+    ropa: "Ropa",
+    otros: "Otros",
+};
+const conditionLabels = { nuevo: "Nuevo", usado: "Usado" };
+
 const isModalOpen = ref(false);
 const selectedPost = ref(null);
 
@@ -71,12 +79,13 @@ onMounted(() => {
             </button>
         </div>
 
-        <DataTable :items="posts" :loading="loading" :error="error" :colspan="5"
+        <DataTable :items="posts" :loading="loading" :error="error" :colspan="6"
             empty-message="No hay productos publicados.">
             <template #header>
                 <th class="w-16">ID</th>
                 <th>Título</th>
-                <th>Tipo</th>
+                <th>Categoría</th>
+                <th>Condición</th>
                 <th>Estado</th>
                 <th class="text-center w-32">Acciones</th>
             </template>
@@ -85,7 +94,10 @@ onMounted(() => {
                 <td class="font-mono text-xs opacity-70">#{{ post.id }}</td>
                 <td class="font-semibold text-base-content">{{ post.title }}</td>
                 <td>
-                    <span class="badge badge-outline badge-sm">{{ post.type }}</span>
+                    <span class="badge badge-outline badge-sm">{{ categoryLabels[post.category] || post.category }}</span>
+                </td>
+                <td>
+                    <span class="badge badge-outline badge-sm">{{ conditionLabels[post.condition] || post.condition }}</span>
                 </td>
                 <td>
                     <StateBadge :state="post.state" />
