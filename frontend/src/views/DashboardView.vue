@@ -111,10 +111,18 @@ async function handleToggleReservation(id) {
     }
 }
 
-async function handleComplete(id) {
+const completedPost = ref(null);
+
+function showCompleted() {
+    completedPost.value = null;
+    applyFilters({ state: "intercambiado" });
+}
+
+async function handleComplete(post) {
     if (!confirm("¿Deseas marcar este intercambio como completado?")) return;
     try {
-        await postsStore.completeExchange(id);
+        await postsStore.completeExchange(post.id);
+        completedPost.value = { title: post.title, owner: post.owner?.name };
         loadPosts();
     } catch (err) {
         alert(err.message);
@@ -177,6 +185,20 @@ watch(
             <button type="button" @click="clearFilters" class="btn btn-outline btn-sm">Limpiar filtros</button>
         </div>
 
+        <div v-if="completedPost" role="status" class="alert alert-success shadow-sm mt-6 flex flex-wrap justify-between">
+            <div>
+                <p class="font-semibold">Intercambio completado: {{ completedPost.title }}</p>
+                <p class="text-sm">
+                    Completaste el intercambio con {{ completedPost.owner }}. La publicación ya no aparece en
+                    "Disponibles y reservados".
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <button type="button" @click="showCompleted" class="btn btn-sm">Ver intercambiados</button>
+                <button type="button" @click="completedPost = null" class="btn btn-ghost btn-sm">Cerrar</button>
+            </div>
+        </div>
+
         <div v-if="exploreLoading" class="flex justify-center py-16">
             <span class="loading loading-spinner loading-lg text-primary"></span>
         </div>
@@ -211,7 +233,7 @@ watch(
                     </div>
                     <div v-else-if="post.state === 'reservado' && post.reservedById === authStore.user?.id"
                         class="flex flex-wrap gap-2">
-                        <button type="button" @click="handleComplete(post.id)"
+                        <button type="button" @click="handleComplete(post)"
                             class="btn btn-success btn-sm">Completar intercambio</button>
                         <button type="button" @click="handleToggleReservation(post.id)"
                             class="btn btn-ghost btn-sm">Liberar reserva</button>
