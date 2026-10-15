@@ -164,6 +164,24 @@ Issue principal: #11.
 
 
 
+### H6. Reconocer antes que recordar — No cumple (severidad 2, menor) · #15
+
+- **Pantalla o flujo:** Explorar con el filtro "Reservado", para encontrar el objeto que reservé y completarlo.
+- **Problema:** las tarjetas reservadas por otras personas dicen "Reservado por otra persona", pero las que reservé yo no dicen nada. Solo se distinguen porque tienen botones. No hay ningún texto que diga que la reserva es mía.
+- **Consecuencia:** para encontrar su objeto entre varios reservados, la persona tiene que recordar qué reservó o deducirlo por los botones.
+- **Código (antes):** `DashboardView.vue:234-243`.
+- **Corrección:** las tarjetas reservadas por la persona muestran "Reservado por ti" encima de las acciones, en el mismo lugar donde las demás muestran "Reservado por otra persona".
+- **Comprobación:** con el filtro "Reservado", se identifican las reservas propias leyendo la tarjeta.
+- **Archivos modificados:** `frontend/src/views/DashboardView.vue`.
+
+
+| Antes                          | Después                          |
+| ------------------------------ | -------------------------------- |
+| ![](evidencias/H6_1_antes.png) | ![](evidencias/H6_1_despues.png) |
+
+
+
+
 ### H7. Flexibilidad y eficiencia — Cumple
 
 - **Pantalla o flujo:** Explorar, al buscar y filtrar.

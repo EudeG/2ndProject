@@ -233,13 +233,15 @@ watch(
                         <button type="button" @click="handleToggleReservation(post.id)"
                             class="btn btn-primary btn-sm">Reservar</button>
                     </div>
-                    <div v-else-if="post.state === 'reservado' && post.reservedById === authStore.user?.id"
-                        class="flex flex-wrap gap-2">
-                        <button type="button" @click="handleComplete(post)"
-                            class="btn btn-success btn-sm">Completar intercambio</button>
-                        <button type="button" @click="handleToggleReservation(post.id)"
-                            class="btn btn-ghost btn-sm">Liberar reserva</button>
-                    </div>
+                    <template v-else-if="post.state === 'reservado' && post.reservedById === authStore.user?.id">
+                        <p class="text-xs font-semibold">Reservado por ti</p>
+                        <div class="flex flex-wrap gap-2">
+                            <button type="button" @click="handleComplete(post)"
+                                class="btn btn-success btn-sm">Completar intercambio</button>
+                            <button type="button" @click="handleToggleReservation(post.id)"
+                                class="btn btn-ghost btn-sm">Liberar reserva</button>
+                        </div>
+                    </template>
                     <p v-else-if="post.state === 'reservado'" class="text-xs text-base-content/60">
                         Reservado por otra persona
                     </p>
