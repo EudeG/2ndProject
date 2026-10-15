@@ -164,6 +164,17 @@ watch(
     <div class="mx-auto max-w-6xl p-6">
         <PageTitle title="Explorar" subtitle="Encuentra objetos para intercambiar con otros estudiantes" />
 
+        <details class="mt-3 text-sm">
+            <summary class="cursor-pointer link link-primary w-fit">¿Cómo funciona un intercambio?</summary>
+            <ol class="list-decimal ml-6 mt-2 space-y-1 text-base-content/80">
+                <li>Pulsa <strong>Reservar</strong> en el objeto que te interesa. Mientras esté reservado, nadie más
+                    puede reservarlo.</li>
+                <li>Coordina la entrega con el dueño. Si cambias de opinión, usa <strong>Liberar reserva</strong>.</li>
+                <li>Cuando recibas el objeto, pulsa <strong>Completar intercambio</strong>. Esta acción no se puede
+                    deshacer.</li>
+            </ol>
+        </details>
+
         <form @submit.prevent="search"
             class="card bg-base-100 shadow-sm border border-base-300 mt-6 p-4 flex flex-col lg:flex-row gap-3">
             <input v-model="q" type="text" placeholder="Buscar por título" class="input input-bordered w-full lg:flex-1" />

@@ -220,3 +220,17 @@ Issue principal: #11.
 
 En la captura de "antes" no aparece el `alert` nativo porque el navegador lo dibuja fuera de la página. Su texto exacto es el que se cita arriba.
 
+### H10. Ayuda y documentación — No cumple (severidad 1, cosmético) · #17
+
+- **Pantalla o flujo:** Explorar, primera visita.
+- **Problema:** en ningún lugar se explica cómo funciona un intercambio: que primero se reserva, que mientras tanto nadie más puede reservar, que la reserva se puede liberar y que completar es el último paso y no se deshace.
+- **Consecuencia:** una persona nueva puede pensar que "Reservar" ya completa el intercambio, o no saber cuándo pulsar "Completar intercambio".
+- **Código (antes):** `DashboardView.vue:147` (solo título y subtítulo).
+- **Corrección:** se agregó un enlace desplegable, "¿Cómo funciona un intercambio?", debajo del título, con tres pasos breves. Queda cerrado por defecto para no agregar ruido (H8).
+- **Comprobación:** una persona nueva abre la ayuda y explica el orden de los pasos sin preguntar.
+- **Archivos modificados:** `frontend/src/views/DashboardView.vue`.
+
+
+| Antes                           | Después                           |
+| ------------------------------- | --------------------------------- |
+| ![](evidencias/H10_1_antes.png) | ![](evidencias/H10_1_despues.png) |
