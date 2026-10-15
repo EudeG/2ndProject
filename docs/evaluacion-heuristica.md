@@ -96,6 +96,24 @@ Issue principal: #11.
 
 
 
+### H2. Relación con el mundo real — No cumple (severidad 1, cosmético) · #12
+
+- **Pantalla o flujo:** Mis publicaciones (`/posts`).
+- **Problema:** la primera columna, "ID", muestra el identificador interno de la base de datos, un UUID como `#fee9f183-a7c4-43e8-b2d0-bc9806eef726`. Para un estudiante ese dato no significa nada. Además, ocupa cuatro líneas por fila y empuja el título, que es el dato con el que la persona reconoce su objeto. En el backend, los mensajes de sesión usan jerga técnica y les faltan tildes: "Acceso no autorizado: falta el token de sesion" y "Token invalido o expirado".
+- **Consecuencia:** la tabla es más difícil de recorrer. Si la sesión expira, la persona lee la palabra "token", que no forma parte de su vocabulario.
+- **Código (antes):** `UserPostsView.vue:86` y `:94` (columna ID); `backend/src/middleware/auth.js:8` y `:14`.
+- **Corrección:** se eliminó la columna ID de la tabla y los mensajes pasaron a "Debes iniciar sesión para continuar." y "Tu sesión expiró. Inicia sesión nuevamente.".
+- **Comprobación:** la tabla abre con el título como primera columna y cada fila ocupa una sola línea.
+- **Archivos modificados:** `frontend/src/views/UserPostsView.vue`, `backend/src/middleware/auth.js`.
+
+
+| Antes                          | Después                          |
+| ------------------------------ | -------------------------------- |
+| ![](evidencias/H2_1_antes.png) | ![](evidencias/H2_1_despues.png) |
+
+
+
+
 ### H3. Control y libertad — Cumple
 
 - **Pantalla o flujo:** Explorar, en una tarjeta reservada por mí.

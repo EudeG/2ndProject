@@ -79,10 +79,9 @@ onMounted(() => {
             </button>
         </div>
 
-        <DataTable :items="posts" :loading="loading" :error="error" :colspan="6"
+        <DataTable :items="posts" :loading="loading" :error="error" :colspan="5"
             empty-message="No hay productos publicados.">
             <template #header>
-                <th class="w-16">ID</th>
                 <th>Título</th>
                 <th>Categoría</th>
                 <th>Condición</th>
@@ -91,7 +90,6 @@ onMounted(() => {
             </template>
 
             <tr v-for="post in posts" :key="post.id" class="hover">
-                <td class="font-mono text-xs opacity-70">#{{ post.id }}</td>
                 <td class="font-semibold text-base-content">{{ post.title }}</td>
                 <td>
                     <span class="badge badge-outline badge-sm">{{ categoryLabels[post.category] || post.category }}</span>
