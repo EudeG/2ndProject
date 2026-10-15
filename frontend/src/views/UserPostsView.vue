@@ -52,10 +52,12 @@ async function handleToggleReservation(id) {
     }
 }
 
-async function handleComplete(id) {
-    if (!confirm("¿Deseas marcar este intercambio como completado?")) return;
+async function handleComplete(post) {
+    const message = `¿Confirmas que entregaste "${post.title}" a ${post.reservedBy?.name}? ` +
+        "El intercambio quedará cerrado y no se puede deshacer.";
+    if (!confirm(message)) return;
     try {
-        await postsStore.completeExchange(id);
+        await postsStore.completeExchange(post.id);
     } catch (err) {
         alert(err.message);
     }
@@ -106,7 +108,7 @@ onMounted(() => {
                         <div class="flex flex-wrap items-center gap-1">
 
                             <template v-if="post.state === 'reservado'">
-                                <button type="button" @click="handleComplete(post.id)"
+                                <button type="button" @click="handleComplete(post)"
                                     class="btn btn-success btn-sm">Completar intercambio</button>
                                 <button type="button" @click="handleToggleReservation(post.id)"
                                     class="btn btn-ghost btn-sm">Liberar reserva</button>
@@ -142,6 +144,9 @@ onMounted(() => {
 
                         </div>
 
+                        <span v-if="post.state === 'disponible'" class="text-xs text-base-content/60">
+                            Para completar el intercambio, otro estudiante debe reservarlo primero
+                        </span>
                         <span v-if="post.state === 'reservado'" class="text-xs text-warning font-medium">
                             Reservado por {{ post.reservedBy?.name }}
                         </span>

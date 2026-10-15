@@ -144,6 +144,26 @@ Issue principal: #11.
 
 
 
+### H5. Prevención de errores — No cumple (severidad 2, menor) · #14
+
+- **Pantalla o flujo:** Mis publicaciones, caso bloqueado (publicación "Disponible"), y la confirmación al completar en ambas pantallas.
+- **Problema:** el check de completar aparece apagado al 30 % y el motivo solo está en un tooltip, que no aparece en pantallas táctiles. Por otro lado, completar es irreversible, pero la confirmación es genérica: "¿Deseas marcar este intercambio como completado?". No dice qué objeto, con quién, ni que no se puede deshacer.
+- **Consecuencia:** el dueño no sabe qué le falta para completar. En el caso permitido, una persona con varias reservas puede confirmar el objeto equivocado sin notarlo.
+- **Código (antes):** `UserPostsView.vue:128-138` (tooltip), `UserPostsView.vue:56` y `DashboardView.vue:122` (`confirm` genérico).
+- **Corrección:** en las publicaciones disponibles se muestra un texto visible bajo las acciones: "Para completar el intercambio, otro estudiante debe reservarlo primero". La confirmación ahora nombra el objeto y a la otra persona, y advierte que la acción no se puede deshacer:
+  - Explorar: `¿Confirmas que recibiste "Audífonos Sony WH-CH520" de Martita Becerra? El intercambio quedará cerrado y no se puede deshacer.`
+  - Mis publicaciones: `¿Confirmas que entregaste "Chaqueta de la facultad" a Usuario Invitado? El intercambio quedará cerrado y no se puede deshacer.`
+- **Comprobación:** el motivo del bloqueo se lee sin pasar el mouse. La confirmación es un cuadro nativo del navegador y no sale en la captura; el texto está en `DashboardView.vue:136-139` y `UserPostsView.vue:63-66`.
+- **Archivos modificados:** `frontend/src/views/UserPostsView.vue`, `frontend/src/views/DashboardView.vue`.
+
+
+| Antes                          | Después                          |
+| ------------------------------ | -------------------------------- |
+| ![](evidencias/H5_1_antes.png) | ![](evidencias/H5_1_despues.png) |
+
+
+
+
 ### H7. Flexibilidad y eficiencia — Cumple
 
 - **Pantalla o flujo:** Explorar, al buscar y filtrar.

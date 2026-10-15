@@ -119,7 +119,9 @@ function showCompleted() {
 }
 
 async function handleComplete(post) {
-    if (!confirm("¿Deseas marcar este intercambio como completado?")) return;
+    const message = `¿Confirmas que recibiste "${post.title}" de ${post.owner?.name}? ` +
+        "El intercambio quedará cerrado y no se puede deshacer.";
+    if (!confirm(message)) return;
     try {
         await postsStore.completeExchange(post.id);
         completedPost.value = { title: post.title, owner: post.owner?.name };
