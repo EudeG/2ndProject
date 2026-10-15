@@ -86,7 +86,7 @@ onMounted(() => {
                 <th>Categoría</th>
                 <th>Condición</th>
                 <th>Estado</th>
-                <th class="text-center w-32">Acciones</th>
+                <th>Acciones</th>
             </template>
 
             <tr v-for="post in posts" :key="post.id" class="hover">
@@ -100,41 +100,17 @@ onMounted(() => {
                 <td>
                     <StateBadge :state="post.state" />
                 </td>
-                <td class="text-center">
+                <td>
                     <div v-if="!post.userId || post.userId === authStore.user?.id"
-                        class="flex flex-col items-center gap-1">
-                        <div class="inline-flex items-center gap-1">
+                        class="flex flex-col items-start gap-1">
+                        <div class="flex flex-wrap items-center gap-1">
 
-                            <button v-if="post.state === 'reservado'" @click="handleToggleReservation(post.id)"
-                                class="btn btn-square btn-ghost btn-sm"
-                                :class="post.state === 'reservado' ? 'text-warning' : 'text-success'"
-                                :title="post.state === 'reservado' ? 'Liberar reserva' : 'Reservar'">
-
-                                <svg v-if="post.state === 'reservado'" xmlns="http://www.w3.org/2000/svg" fill="none"
-                                    viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M13.5 10.5V6.75a4.5 4.5 0 1 1 9 0v3.75M3.75 21.75h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H3.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                                </svg>
-
-                                <svg v-else xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                        d="M16.5 10.5V6.75a4.5 4.5 0 1 0-9 0v3.75m-.75 11.25h10.5a2.25 2.25 0 0 0 2.25-2.25v-6.75a2.25 2.25 0 0 0-2.25-2.25H6.75a2.25 2.25 0 0 0-2.25 2.25v6.75a2.25 2.25 0 0 0 2.25 2.25Z" />
-                                </svg>
-                            </button>
-
-                            <div v-if="post.state !== 'intercambiado'" class="tooltip tooltip-left"
-                                :data-tip="post.state === 'disponible' ? 'Primero otro estudiante debe reservarlo' : 'Completar intercambio'">
-                                <button @click="handleComplete(post.id)"
-                                    :disabled="post.state === 'disponible'"
-                                    class="btn btn-square btn-ghost btn-sm text-success disabled:opacity-30"
-                                    aria-label="Completar intercambio">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                        stroke-width="1.5" stroke="currentColor" class="h-4 w-4">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                    </svg>
-                                </button>
-                            </div>
+                            <template v-if="post.state === 'reservado'">
+                                <button type="button" @click="handleComplete(post.id)"
+                                    class="btn btn-success btn-sm">Completar intercambio</button>
+                                <button type="button" @click="handleToggleReservation(post.id)"
+                                    class="btn btn-ghost btn-sm">Liberar reserva</button>
+                            </template>
 
                             <div class="tooltip tooltip-left"
                                 :data-tip="post.state === 'reservado' ? 'Publicación reservada, no se puede editar' : post.state === 'intercambiado' ? 'Publicación intercambiada, no se puede editar' : 'Editar'">

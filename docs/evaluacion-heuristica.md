@@ -124,6 +124,26 @@ Issue principal: #11.
 
 ![](evidencias/H3_1_cumple.png)
 
+### H4. Consistencia y estándares — No cumple (severidad 2, menor) · #13
+
+- **Pantalla o flujo:** Explorar comparado con Mis publicaciones.
+- **Problema:** en Explorar, las acciones son botones con texto ("Completar intercambio" y "Liberar reserva"). En Mis publicaciones, las mismas acciones son íconos sin texto: un check y un candado abierto. El candado no comunica "liberar reserva". El mismo dato se llama "Estado" en la columna de la tabla y "Disponibilidad" en el chip del filtro. El menú dice "Mis Publicaciones" y el título de la página, "Mis publicaciones".
+- **Consecuencia:** la persona debe aprender dos veces la misma acción y puede confundir el candado con "bloquear".
+- **Código (antes):** `UserPostsView.vue:110-139` (íconos), `DashboardView.vue:62` (chip "Disponibilidad") y `Navbar.vue:35`.
+- **Corrección:** Mis publicaciones usa los mismos botones con texto que Explorar, con las mismas clases (`btn-success` y `btn-ghost`). El chip ahora dice "Estado: …" y el menú, "Mis publicaciones".
+- **Comprobación:** se completó y se liberó una reserva desde ambas pantallas usando los mismos botones.
+- **Nota:** el badge de estado se ve igual en ambas pantallas porque `StateBadge.vue` aplica `capitalize`, así que ese punto no requiere cambios.
+- **Archivos modificados:** `frontend/src/views/UserPostsView.vue`, `frontend/src/views/DashboardView.vue`, `frontend/src/components/Navbar.vue`.
+
+
+| Antes                          | Después                          |
+| ------------------------------ | -------------------------------- |
+| ![](evidencias/H4_1_antes.png) | ![](evidencias/H4_1_despues.png) |
+| ![](evidencias/H4_2_antes.png) | ![](evidencias/H4_2_despues.png) |
+
+
+
+
 ### H7. Flexibilidad y eficiencia — Cumple
 
 - **Pantalla o flujo:** Explorar, al buscar y filtrar.

@@ -59,7 +59,7 @@ const chips = computed(() => {
     if (filters.value.state) {
         list.push({
             key: "state",
-            text: `Disponibilidad: ${stateLabels[filters.value.state] || filters.value.state}`,
+            text: `Estado: ${stateLabels[filters.value.state] || filters.value.state}`,
         });
     }
     return list;
