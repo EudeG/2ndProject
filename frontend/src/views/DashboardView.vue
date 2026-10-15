@@ -102,33 +102,49 @@ function loadPosts() {
     postsStore.fetchExplore(filters.value);
 }
 
-async function handleToggleReservation(id) {
-    try {
-        await postsStore.toggleReservation(id);
-        loadPosts();
-    } catch (err) {
-        alert(err.message);
-    }
-}
-
 const completedPost = ref(null);
+const actionError = ref(null);
 
 function showCompleted() {
     completedPost.value = null;
     applyFilters({ state: "intercambiado" });
 }
 
+function showAvailable() {
+    actionError.value = null;
+    applyFilters({ state: "disponible" });
+}
+
+async function handleToggleReservation(post) {
+    const reserving = post.state === "disponible";
+    actionError.value = null;
+    completedPost.value = null;
+    try {
+        await postsStore.toggleReservation(post.id);
+    } catch (err) {
+        actionError.value = reserving
+            ? {
+                  title: `No se pudo reservar "${post.title}"`,
+                  text: "Otra persona lo reservó antes que tú o ya fue intercambiado. Actualizamos la lista: elige otro objeto disponible.",
+                  canShowAvailable: true,
+              }
+            : { title: `No se pudo liberar la reserva de "${post.title}"`, text: err.message };
+    }
+    loadPosts();
+}
+
 async function handleComplete(post) {
     const message = `¿Confirmas que recibiste "${post.title}" de ${post.owner?.name}? ` +
         "El intercambio quedará cerrado y no se puede deshacer.";
     if (!confirm(message)) return;
+    actionError.value = null;
     try {
         await postsStore.completeExchange(post.id);
         completedPost.value = { title: post.title, owner: post.owner?.name };
-        loadPosts();
     } catch (err) {
-        alert(err.message);
+        actionError.value = { title: `No se pudo completar el intercambio de "${post.title}"`, text: err.message };
     }
+    loadPosts();
 }
 
 watch(
@@ -201,6 +217,18 @@ watch(
             </div>
         </div>
 
+        <div v-if="actionError" role="alert" class="alert alert-error shadow-sm mt-6 flex flex-wrap justify-between">
+            <div>
+                <p class="font-semibold">{{ actionError.title }}</p>
+                <p class="text-sm">{{ actionError.text }}</p>
+            </div>
+            <div class="flex gap-2">
+                <button v-if="actionError.canShowAvailable" type="button" @click="showAvailable"
+                    class="btn btn-sm">Ver disponibles</button>
+                <button type="button" @click="actionError = null" class="btn btn-ghost btn-sm">Cerrar</button>
+            </div>
+        </div>
+
         <div v-if="exploreLoading" class="flex justify-center py-16">
             <span class="loading loading-spinner loading-lg text-primary"></span>
         </div>
@@ -230,7 +258,7 @@ watch(
                         <StateBadge :state="post.state" />
                     </div>
                     <div v-if="post.state === 'disponible'">
-                        <button type="button" @click="handleToggleReservation(post.id)"
+                        <button type="button" @click="handleToggleReservation(post)"
                             class="btn btn-primary btn-sm">Reservar</button>
                     </div>
                     <template v-else-if="post.state === 'reservado' && post.reservedById === authStore.user?.id">
@@ -238,7 +266,7 @@ watch(
                         <div class="flex flex-wrap gap-2">
                             <button type="button" @click="handleComplete(post)"
                                 class="btn btn-success btn-sm">Completar intercambio</button>
-                            <button type="button" @click="handleToggleReservation(post.id)"
+                            <button type="button" @click="handleToggleReservation(post)"
                                 class="btn btn-ghost btn-sm">Liberar reserva</button>
                         </div>
                     </template>

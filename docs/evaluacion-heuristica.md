@@ -202,3 +202,21 @@ Issue principal: #11.
 
 ![](evidencias/H8_1_cumple.png)
 
+### H9. Reconocer y recuperarse de errores — No cumple (severidad 3, mayor) · #16
+
+- **Pantalla o flujo:** Explorar, caso de conflicto. Admin ve "Química general – Chang" como disponible, pero mientras tanto otra cuenta la reserva. Admin pulsa "Reservar".
+- **Problema:** aparece un `alert()` nativo con el texto **"Solo el dueño o quien reservó pueden liberar la reserva."**. Ese mensaje corresponde a otra acción, porque la persona quería reservar y no liberar. Tampoco ofrece una salida. Además, como la lista solo se recarga cuando la acción sale bien, después de cerrar el alert la tarjeta sigue mostrando "Disponible" y el botón "Reservar", aunque ya no lo está. Lo mismo ocurre con todos los errores de Explorar y Mis publicaciones, que se muestran con `alert(err.message)`.
+- **Consecuencia:** la persona no entiende qué pasó, puede volver a intentarlo con el mismo resultado y no sabe cómo continuar. Afecta el paso central de la tarea, que es conseguir la reserva.
+- **Código (antes):** `DashboardView.vue:105-112` (`alert` sin recarga), `UserPostsView.vue:43,51,60` y `backend/src/rules/postRules.js:27`.
+- **Corrección:** los errores se muestran en un aviso dentro de la página (`role="alert"`) y siempre se recarga la lista. Si falla una reserva, el aviso dice **"No se pudo reservar *objeto*. Otra persona lo reservó antes que tú o ya fue intercambiado. Actualizamos la lista: elige otro objeto disponible."** y ofrece "Ver disponibles" y "Cerrar". En Mis publicaciones se muestra el mensaje del backend y se agrega "La lista se actualizó con el estado actual.".
+- **Comprobación:** se repitió el conflicto con "Cálculo I – Stewart". El aviso explica el motivo y ofrece "Ver disponibles" (aplica el filtro `state=disponible`). La tarjeta pasa a "Reservado por otra persona" sin recargar la página a mano.
+- **Archivos modificados:** `frontend/src/views/DashboardView.vue`, `frontend/src/views/UserPostsView.vue`.
+
+
+| Antes                          | Después                          |
+| ------------------------------ | -------------------------------- |
+| ![](evidencias/H9_1_antes.png) | ![](evidencias/H9_1_despues.png) |
+
+
+En la captura de "antes" no aparece el `alert` nativo porque el navegador lo dibuja fuera de la página. Su texto exacto es el que se cita arriba.
+

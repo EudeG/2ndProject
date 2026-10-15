@@ -24,6 +24,7 @@ const conditionLabels = { nuevo: "Nuevo", usado: "Usado" };
 
 const isModalOpen = ref(false);
 const selectedPost = ref(null);
+const actionError = ref("");
 
 function openCreateModal() {
     selectedPost.value = null;
@@ -35,20 +36,27 @@ function openEditModal(post) {
     isModalOpen.value = true;
 }
 
+function showActionError(err) {
+    actionError.value = err.message;
+    postsStore.fetchPosts().catch(() => {});
+}
+
 async function handleDelete(id) {
     if (!confirm("¿Deseas eliminar esta publicación?")) return;
+    actionError.value = "";
     try {
         await postsStore.deletePost(id);
     } catch (err) {
-        alert(err.message);
+        showActionError(err);
     }
 }
 
 async function handleToggleReservation(id) {
+    actionError.value = "";
     try {
         await postsStore.toggleReservation(id);
     } catch (err) {
-        alert(err.message);
+        showActionError(err);
     }
 }
 
@@ -56,10 +64,11 @@ async function handleComplete(post) {
     const message = `¿Confirmas que entregaste "${post.title}" a ${post.reservedBy?.name}? ` +
         "El intercambio quedará cerrado y no se puede deshacer.";
     if (!confirm(message)) return;
+    actionError.value = "";
     try {
         await postsStore.completeExchange(post.id);
     } catch (err) {
-        alert(err.message);
+        showActionError(err);
     }
 }
 
@@ -79,6 +88,11 @@ onMounted(() => {
                 </svg>
                 Nueva publicación
             </button>
+        </div>
+
+        <div v-if="actionError" role="alert" class="alert alert-error shadow-sm mb-4 flex justify-between">
+            <span>{{ actionError }} La lista se actualizó con el estado actual.</span>
+            <button type="button" @click="actionError = ''" class="btn btn-ghost btn-sm">Cerrar</button>
         </div>
 
         <DataTable :items="posts" :loading="loading" :error="error" :colspan="5"
