@@ -51,7 +51,18 @@
 
 **Consecuencia:** antes de buscar un objeto, la persona revisa cinco controles y evalúa opciones que la mayoría de las veces no necesita. Eso aumenta el tiempo de decisión en el primer paso de la tarea.
 
-**Estado:** Documentado.
+**Corrección:**
+
+- `DashboardView.vue`: la barra muestra solo los filtros que más se usan: la búsqueda por título y el Estado. Categoría y Condición quedan detrás del botón **"Más filtros"**, que muestra cuántos de esos filtros están activos y se abre solo si alguno ya está aplicado.
+- Se quitó el botón "Buscar". El texto se aplica solo, 400 ms después de dejar de escribir (o al pulsar Enter), igual que los selects. Ya no hay que decidir si hace falta pulsar algo.
+
+**Comprobación:** al entrar a Explorar se ven **3 controles** en lugar de 5, con 4 opciones en la única lista visible (antes 12 en tres listas). Al escribir "calc" en la búsqueda, sin pulsar nada, la dirección cambia a `?q=calc` y la lista muestra "1 resultado".
+
+| Antes                                     | Después                                     |
+| ----------------------------------------- | ------------------------------------------- |
+| ![](evidencias/clase-16/hick_1_antes.png) | ![](evidencias/clase-16/hick_1_despues.png) |
+
+**Estado:** Corregido.
 
 ---
 

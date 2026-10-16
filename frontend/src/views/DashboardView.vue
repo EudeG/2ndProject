@@ -31,6 +31,8 @@ const q = ref("");
 const category = ref("");
 const condition = ref("");
 const state = ref("");
+const showMoreFilters = ref(false);
+let searchTimer = null;
 
 const filters = computed(() => ({
     q: route.query.q || "",
@@ -65,6 +67,13 @@ const chips = computed(() => {
     return list;
 });
 
+const extraFiltersCount = computed(() => {
+    let count = 0;
+    if (filters.value.category) count++;
+    if (filters.value.condition) count++;
+    return count;
+});
+
 const countText = computed(() => {
     const n = explorePosts.value.length;
     if (chips.value.length > 0) {
@@ -82,6 +91,7 @@ function applyFilters(values) {
 }
 
 function search() {
+    clearTimeout(searchTimer);
     applyFilters({
         q: q.value.trim(),
         category: category.value,
@@ -155,13 +165,21 @@ async function handleComplete(post) {
     loadPosts();
 }
 
+watch(q, (value) => {
+    clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => {
+        if (value.trim() !== filters.value.q) search();
+    }, 400);
+});
+
 watch(
     () => route.query,
     () => {
-        q.value = filters.value.q;
+        if (q.value.trim() !== filters.value.q) q.value = filters.value.q;
         category.value = filters.value.category;
         condition.value = filters.value.condition;
         state.value = filters.value.state;
+        if (extraFiltersCount.value > 0) showMoreFilters.value = true;
         loadPosts();
     },
     { immediate: true },
@@ -183,28 +201,36 @@ watch(
             </ol>
         </details>
 
-        <form @submit.prevent="search"
-            class="card bg-base-100 shadow-sm border border-base-300 mt-6 p-4 flex flex-col lg:flex-row gap-3">
-            <input v-model="q" type="text" placeholder="Buscar por título" class="input input-bordered w-full lg:flex-1" />
-            <select v-model="category" @change="search" class="select select-bordered w-full lg:w-52">
-                <option value="">Todas las categorías</option>
-                <option value="libros">Libros</option>
-                <option value="electronica">Electrónica</option>
-                <option value="ropa">Ropa</option>
-                <option value="otros">Otros</option>
-            </select>
-            <select v-model="condition" @change="search" class="select select-bordered w-full lg:w-52">
-                <option value="">Cualquier condición</option>
-                <option value="nuevo">Nuevo</option>
-                <option value="usado">Usado</option>
-            </select>
-            <select v-model="state" @change="search" class="select select-bordered w-full lg:w-52">
-                <option value="">Disponibles y reservados</option>
-                <option value="disponible">Disponible</option>
-                <option value="reservado">Reservado</option>
-                <option value="intercambiado">Intercambiado</option>
-            </select>
-            <button type="submit" class="btn btn-primary">Buscar</button>
+        <form @submit.prevent="search" class="card bg-base-100 shadow-sm border border-base-300 mt-6 p-4 gap-3">
+            <div class="flex flex-col lg:flex-row gap-3">
+                <input v-model="q" type="search" placeholder="Buscar por título"
+                    class="input input-bordered w-full lg:flex-1" />
+                <select v-model="state" @change="search" class="select select-bordered w-full lg:w-56">
+                    <option value="">Disponibles y reservados</option>
+                    <option value="disponible">Disponible</option>
+                    <option value="reservado">Reservado</option>
+                    <option value="intercambiado">Intercambiado</option>
+                </select>
+                <button type="button" @click="showMoreFilters = !showMoreFilters" class="btn btn-outline"
+                    :aria-expanded="showMoreFilters">
+                    {{ showMoreFilters ? "Menos filtros" : "Más filtros" }}
+                    <span v-if="extraFiltersCount > 0" class="badge badge-primary badge-sm">{{ extraFiltersCount }}</span>
+                </button>
+            </div>
+            <div v-if="showMoreFilters" class="flex flex-col lg:flex-row gap-3">
+                <select v-model="category" @change="search" class="select select-bordered w-full lg:w-52">
+                    <option value="">Todas las categorías</option>
+                    <option value="libros">Libros</option>
+                    <option value="electronica">Electrónica</option>
+                    <option value="ropa">Ropa</option>
+                    <option value="otros">Otros</option>
+                </select>
+                <select v-model="condition" @change="search" class="select select-bordered w-full lg:w-52">
+                    <option value="">Cualquier condición</option>
+                    <option value="nuevo">Nuevo</option>
+                    <option value="usado">Usado</option>
+                </select>
+            </div>
         </form>
 
         <div v-if="chips.length > 0" class="flex flex-wrap items-center gap-2 mt-4">
