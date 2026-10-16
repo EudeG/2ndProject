@@ -207,18 +207,15 @@ watch(
             <button type="submit" class="btn btn-primary">Buscar</button>
         </form>
 
-        <div v-if="chips.length > 0" class="flex flex-wrap items-center justify-between gap-3 mt-4">
-            <div class="flex flex-wrap gap-2">
-                <span v-for="chip in chips" :key="chip.key" class="badge badge-primary badge-soft badge-lg gap-2">
-                    {{ chip.text }}
-                    <button type="button" @click="removeFilter(chip.key)" aria-label="Quitar filtro">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
-                            stroke="currentColor" class="h-4 w-4">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
-                        </svg>
-                    </button>
-                </span>
-            </div>
+        <div v-if="chips.length > 0" class="flex flex-wrap items-center gap-2 mt-4">
+            <button v-for="chip in chips" :key="chip.key" type="button" @click="removeFilter(chip.key)"
+                :aria-label="`Quitar filtro ${chip.text}`" class="btn btn-primary btn-soft btn-sm gap-2">
+                {{ chip.text }}
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                    stroke="currentColor" class="h-5 w-5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18 18 6M6 6l12 12" />
+                </svg>
+            </button>
             <button type="button" @click="clearFilters" class="btn btn-outline btn-sm">Limpiar filtros</button>
         </div>
 

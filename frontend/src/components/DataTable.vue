@@ -1,4 +1,3 @@
-<!-- components/common/DataTable.vue -->
 <script setup>
 defineProps({
     items: {

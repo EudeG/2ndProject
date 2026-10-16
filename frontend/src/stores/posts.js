@@ -7,7 +7,6 @@ const API_URL = import.meta.env.VITE_API_URL;
 const NETWORK_ERROR_MESSAGE =
     "No hay conexión con el servidor. Revisa tu conexión e intenta de nuevo en unos segundos.";
 
-// fetch only rejects when the server cannot be reached; turn that into a clear, flagged error.
 async function request(url, options) {
     try {
         return await fetch(url, options);

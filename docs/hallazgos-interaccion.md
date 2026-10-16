@@ -22,7 +22,18 @@
 
 **Consecuencia:** quitar un filtro exige apuntar con precisión. En móvil es fácil fallar el toque o pulsar el chip vecino.
 
-**Estado:** Documentado.
+**Corrección:**
+
+- `DashboardView.vue`: cada chip ahora es un botón completo. Al pulsar cualquier parte del chip (texto o "×") se quita ese filtro. La "×" pasó de 16 a 20 px y el botón tiene un `aria-label` con el nombre del filtro.
+- "Limpiar filtros" se movió justo al lado de los chips, en lugar del extremo opuesto de la fila.
+
+**Comprobación:** con los filtros Categoría: Libros y Estado: Disponible, el área que responde al clic es todo el chip: **146 × 32 px** y **155 × 32 px**, por encima del mínimo de 24 × 24 px. "Limpiar filtros" quedó en x = 443 px, a 7 px del último chip (antes estaba a unos 860 px de la primera "×").
+
+| Antes                                      | Después                                      |
+| ------------------------------------------ | -------------------------------------------- |
+| ![](evidencias/clase-16/fitts_1_antes.png) | ![](evidencias/clase-16/fitts_1_despues.png) |
+
+**Estado:** Corregido.
 
 ---
 
