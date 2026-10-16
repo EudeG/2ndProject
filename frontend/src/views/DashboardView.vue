@@ -122,6 +122,13 @@ async function handleToggleReservation(post) {
     try {
         await postsStore.toggleReservation(post.id);
     } catch (err) {
+        if (err.network) {
+            actionError.value = {
+                title: reserving ? `No se pudo reservar "${post.title}"` : `No se pudo liberar la reserva de "${post.title}"`,
+                text: err.message,
+            };
+            return;
+        }
         actionError.value = reserving
             ? {
                   title: `No se pudo reservar "${post.title}"`,
@@ -143,6 +150,7 @@ async function handleComplete(post) {
         completedPost.value = { title: post.title, owner: post.owner?.name };
     } catch (err) {
         actionError.value = { title: `No se pudo completar el intercambio de "${post.title}"`, text: err.message };
+        if (err.network) return;
     }
     loadPosts();
 }

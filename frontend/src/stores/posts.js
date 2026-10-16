@@ -4,6 +4,20 @@ import { useAuthStore } from "@/stores/auth";
 
 const API_URL = import.meta.env.VITE_API_URL;
 
+const NETWORK_ERROR_MESSAGE =
+    "No hay conexión con el servidor. Revisa tu conexión e intenta de nuevo en unos segundos.";
+
+// fetch only rejects when the server cannot be reached; turn that into a clear, flagged error.
+async function request(url, options) {
+    try {
+        return await fetch(url, options);
+    } catch {
+        const err = new Error(NETWORK_ERROR_MESSAGE);
+        err.network = true;
+        throw err;
+    }
+}
+
 export const usePostsStore = defineStore("posts", () => {
     const posts = ref([]);
     const loading = ref(false);
@@ -25,7 +39,7 @@ export const usePostsStore = defineStore("posts", () => {
         loading.value = true;
         error.value = null;
         try {
-            const res = await fetch(`${API_URL}/posts`, {
+            const res = await request(`${API_URL}/posts`, {
                 headers: getHeaders(),
             });
             const data = await res.json();
@@ -52,7 +66,7 @@ export const usePostsStore = defineStore("posts", () => {
             for (const [key, value] of Object.entries(filters)) {
                 if (value) params.set(key, value);
             }
-            const res = await fetch(`${API_URL}/posts/explore?${params}`, {
+            const res = await request(`${API_URL}/posts/explore?${params}`, {
                 headers: getHeaders(),
             });
             const data = await res.json();
@@ -71,7 +85,7 @@ export const usePostsStore = defineStore("posts", () => {
     }
 
     async function createPost(postData) {
-        const res = await fetch(`${API_URL}/posts`, {
+        const res = await request(`${API_URL}/posts`, {
             method: "POST",
             headers: getHeaders(),
             body: JSON.stringify(postData),
@@ -92,7 +106,7 @@ export const usePostsStore = defineStore("posts", () => {
     }
 
     async function updatePost(id, postData) {
-        const res = await fetch(`${API_URL}/posts/${id}`, {
+        const res = await request(`${API_URL}/posts/${id}`, {
             method: "PUT",
             headers: getHeaders(),
             body: JSON.stringify(postData),
@@ -114,7 +128,7 @@ export const usePostsStore = defineStore("posts", () => {
     }
 
     async function deletePost(id) {
-        const res = await fetch(`${API_URL}/posts/${id}`, {
+        const res = await request(`${API_URL}/posts/${id}`, {
             method: "DELETE",
             headers: getHeaders(),
         });
@@ -131,7 +145,7 @@ export const usePostsStore = defineStore("posts", () => {
     }
 
     async function toggleReservation(id) {
-        const res = await fetch(`${API_URL}/posts/${id}/reservation`, {
+        const res = await request(`${API_URL}/posts/${id}/reservation`, {
             method: "PATCH",
             headers: getHeaders(),
         });
@@ -153,7 +167,7 @@ export const usePostsStore = defineStore("posts", () => {
     }
 
     async function completeExchange(id) {
-        const res = await fetch(`${API_URL}/posts/${id}/complete`, {
+        const res = await request(`${API_URL}/posts/${id}/complete`, {
             method: "PATCH",
             headers: getHeaders(),
         });

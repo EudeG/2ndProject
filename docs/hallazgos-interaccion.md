@@ -59,4 +59,15 @@
 
 **Consecuencia:** la persona cree que perdió el objeto, cuando en realidad no hay conexión. Puede abandonar la tarea o pulsar "Ver disponibles", que tampoco funciona sin servidor.
 
-**Estado:** Documentado.
+**Corrección:**
+
+- `stores/posts.js`: todas las peticiones pasan por `request()`. Si el servidor no responde, lanza un error marcado como `network` con el mensaje **"No hay conexión con el servidor. Revisa tu conexión e intenta de nuevo en unos segundos."**, en lugar de "Failed to fetch".
+- `DashboardView.vue`: ante un error de red, Reservar, Liberar reserva y Completar intercambio muestran ese mensaje y **no recargan la lista**, porque la recarga volvería a fallar y apilaría una segunda alerta. El mensaje de "otra persona lo reservó" queda solo para los rechazos reales del servidor.
+
+**Comprobación:** con la lista cargada se detuvo el backend y se pulsó "Reservar" en "Mouse Logitech M170". Aparece **una sola alerta**, con el motivo real y una sola salida ("Cerrar"). Las tarjetas siguen visibles.
+
+| Antes                                     | Después                                     |
+| ----------------------------------------- | ------------------------------------------- |
+| ![](evidencias/clase-16/carga_1_antes.png) | ![](evidencias/clase-16/carga_1_despues.png) |
+
+**Estado:** Corregido.
