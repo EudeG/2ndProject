@@ -35,6 +35,11 @@ async function logout() {
                             Mis publicaciones
                         </RouterLink>
                     </li>
+                    <li>
+                        <RouterLink :to="{ name: 'history' }" exact-active-class="active font-medium">
+                            Historial
+                        </RouterLink>
+                    </li>
                 </ul>
 
                 <button @click="logout" class="btn btn-error btn-sm text-white">
