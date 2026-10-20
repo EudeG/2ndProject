@@ -8,7 +8,12 @@ jest.mock("../src/models", () => ({
         findByPk: jest.fn(),
         findAll: jest.fn(),
     },
-    User: {},
+    User: {
+        findByPk: jest.fn().mockResolvedValue({ name: "Ana Torres" }),
+    },
+    Activity: {
+        create: jest.fn(),
+    },
 }));
 
 describe("Restricciones de estado en publicaciones", () => {

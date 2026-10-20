@@ -1,5 +1,5 @@
 const { Op } = require("sequelize");
-const { Post, User } = require("../models");
+const { Post, User, Activity } = require("../models");
 const { HttpError } = require("../middleware/errorHandler");
 const {
     getCompleteError,
@@ -10,6 +10,11 @@ const { buildPostWhere } = require("../rules/postFilters");
 
 const categories = ["libros", "electronica", "ropa", "otros"];
 const conditions = ["nuevo", "usado"];
+
+async function getUserName(id) {
+    const user = await User.findByPk(id);
+    return user ? user.name : "Usuario eliminado";
+}
 
 exports.list = async (req, res) => {
     const posts = await Post.findAll({
@@ -148,11 +153,27 @@ exports.toggleReservation = async (req, res) => {
     }
 
     if (post.state === "reservado") {
+        const otherId =
+            req.user.id === post.userId ? post.reservedById : post.userId;
         await post.update({ state: "disponible", reservedById: null });
+        await Activity.create({
+            userId: req.user.id,
+            type: "reserva_liberada",
+            postId: post.id,
+            postTitle: post.title,
+            otherUserName: await getUserName(otherId),
+        });
         return res.json({ message: "Reserva liberada", post });
     }
 
     await post.update({ state: "reservado", reservedById: req.user.id });
+    await Activity.create({
+        userId: req.user.id,
+        type: "reservado",
+        postId: post.id,
+        postTitle: post.title,
+        otherUserName: await getUserName(post.userId),
+    });
     res.json({ message: "Publicación reservada.", post });
 };
 
@@ -170,6 +191,23 @@ exports.complete = async (req, res) => {
     }
 
     await post.update({ state: "intercambiado" });
+
+    await Activity.create({
+        userId: post.reservedById,
+        type: "intercambio_completado",
+        role: "receptor",
+        postId: post.id,
+        postTitle: post.title,
+        otherUserName: await getUserName(post.userId),
+    });
+    await Activity.create({
+        userId: post.userId,
+        type: "intercambio_completado",
+        role: "entregador",
+        postId: post.id,
+        postTitle: post.title,
+        otherUserName: await getUserName(post.reservedById),
+    });
 
     res.json({
         message: "Intercambio completado.",
